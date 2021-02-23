@@ -1,104 +1,76 @@
 //window.addEventListener('DOMContentLoaded', async function(event) {
-  
-  // firebase.auth().onAuthStateChanged(async function(user) {
-  //   if (user) {
-  //     // Signed in
-  //     console.log('signed in')
 
-  //     db.collection('users').doc(user.uid).set({
-  //       name: user.displayName,
-  //       email: user.email
-  //     })
+  firebase.auth().onAuthStateChanged(async function(user) {
 
-
-  //     // Sign-out button
-  //   document.querySelector('.sign-in-or-sign-out').innerHTML = `
-  //   <button class="text-pink-500 underline sign-out">Sign Out</button>
-  // `
-  // document.querySelector('.sign-out').addEventListener('click', function(event) {
-  //   console.log('sign out clicked')
-  //   firebase.auth().signOut()
-  //   document.location.href = 'kelloggram.html'
-  //       // Listen for the form submit and create/render the new post
-  //       document.querySelector('form').addEventListener('submit', async function(event) {
-  //         event.preventDefault()
-  //         let postUsername = document.querySelector('#username').value
-  //         let postImageUrl = document.querySelector('#image-url').value
-  //         let postNumberOfLikes = 0
-  //         let docRef = await db.collection('posts').add({ 
-  //           username: postUsername, 
-  //           imageUrl: postImageUrl, 
-  //           likes: 0,
-  //           created: firebase.firestore.FieldValue.serverTimestamp()
-  //         })
-  //         let postId = docRef.id // the newly created document's ID
-  //         renderPost(postId, postUsername, postImageUrl, postNumberOfLikes)
-  //       })
-    
-  //       // Render all posts when the page is loaded
-  //       let querySnapshot = await db.collection('posts').orderBy('created').get()
-  //       let posts = querySnapshot.docs
-  //       for (let i=0; i<posts.length; i++) {
-  //         let postId = posts[i].id
-  //         let postData = posts[i].data()
-  //         let postUsername = postData.username
-  //         let postImageUrl = postData.imageUrl
-  //         let postNumberOfLikes = postData.likes
-  //         renderPost(postId, postUsername, postImageUrl, postNumberOfLikes)
-  //       }
-    
-  //     } else {
-  //       // Signed out
-  //       console.log('signed out')
-    
-  //       // Hide the form when signed-out
-  //       document.querySelector('form').classList.add('hidden')
-    
-  //       // Initializes FirebaseUI Auth
-  //       let ui = new firebaseui.auth.AuthUI(firebase.auth())
-    
-  //       // FirebaseUI configuration
-  //       let authUIConfig = {
-  //         signInOptions: [
-  //           firebase.auth.EmailAuthProvider.PROVIDER_ID
-  //         ],
-  //         signInSuccessUrl: 'kelloggram.html'
-  //       }
-    
-  //       // Starts FirebaseUI Auth
-  //       ui.start('.sign-in-or-sign-out', authUIConfig)
-  //     }
-  
-  let db = firebase.firestore()
   let apiKey = 'afd4a67a9f841cae11019e07948ce1ab'
   let response = await fetch(`https://api.themoviedb.org/3/movie/now_playing?api_key=${apiKey}&language=en-US`)
   let json = await response.json()
   let movies = json.results
   console.log(movies)
-  
-  for (let i=0; i<movies.length; i++) {
-    let movie = movies[i]
-    let docRef = await db.collection('watched').doc(`${movie.id}`).get()
-    let watchedMovie = docRef.data()
-    let opacityClass = ''
-    if (watchedMovie) {
-      opacityClass = 'opacity-20'
+
+    if (user) {
+    // Signed in
+      let db = firebase.firestore()
+      //console.log('signed in')
+
+      db.collection('users').doc(user.uid).set({
+        name: user.displayName,
+        email: user.email
+      })
+
+      for (let i=0; i<movies.length; i++) {
+        let movie = movies[i]
+        let docRef = await db.collection('watched').doc(`${movie.id}`).get()
+        let watchedMovie = docRef.data()
+        let opacityClass = ''
+        if (watchedMovie) {
+          opacityClass = 'opacity-20'
+        }
+    
+        document.querySelector('.movies').insertAdjacentHTML('beforeend', `
+          <div class="w-1/5 p-4 movie-${movie.id} ${opacityClass}">
+            <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" class="w-full">
+            <a href="#" class="watched-button block text-center text-white bg-green-500 mt-4 px-4 py-2 rounded">I've watched this!</a>
+          </div>
+        `)
+    
+        document.querySelector(`.movie-${movie.id}`).addEventListener('click', async function(event) {
+          event.preventDefault()
+          let movieElement = document.querySelector(`.movie-${movie.id}`)
+          movieElement.classList.add('opacity-20')
+          await db.collection('watched').doc(`${movie.id}`).set({})
+        }) 
+      }
+
+    //   Sign-out button
+      document.querySelector('.sign-in-or-sign-out').innerHTML = `
+      <h1> Signed in as ${user.displayName} </h1>
+      <button class="text-pink-500 underline sign-out">Sign Out</button>`
+      document.querySelector('.sign-out').addEventListener('click', async function(event) {
+        console.log('sign out clicked')
+        firebase.auth().signOut()
+        document.location.href = 'movies.html'
+      })
+    } else {
+ // Signed out
+        console.log(`signed out`)
+    
+        // Hide the form when signed-out
+        // document.querySelector('form').classList.add('hidden')
+    
+        // Initializes FirebaseUI Auth
+        let ui = new firebaseui.auth.AuthUI(firebase.auth())
+    
+        // FirebaseUI configuration
+        let authUIConfig = {
+          signInOptions: [
+            firebase.auth.EmailAuthProvider.PROVIDER_ID
+          ],
+          signInSuccessUrl: 'movies.html'
+        }
+        // Starts FirebaseUI Auth
+        ui.start('.sign-in-or-sign-out', authUIConfig)
     }
-
-    document.querySelector('.movies').insertAdjacentHTML('beforeend', `
-      <div class="w-1/5 p-4 movie-${movie.id} ${opacityClass}">
-        <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" class="w-full">
-        <a href="#" class="watched-button block text-center text-white bg-green-500 mt-4 px-4 py-2 rounded">I've watched this!</a>
-      </div>
-    `)
-
-    document.querySelector(`.movie-${movie.id}`).addEventListener('click', async function(event) {
-      event.preventDefault()
-      let movieElement = document.querySelector(`.movie-${movie.id}`)
-      movieElement.classList.add('opacity-20')
-      await db.collection('watched').doc(`${movie.id}`).set({})
-    }) 
-  }
 })
 
 // Goal:   Refactor the movies application from last week, so that it supports
@@ -121,6 +93,8 @@
 //         in as <name>" along with a link to "Sign out". Ensure that a document
 //         is set in the "users" collection for each user that signs in to 
 //         your application.
+
+            //COMPLETE 
 
 // Step 3: Setting the TMDB movie ID as the document ID on your "watched" collection
 //         will no longer work. The document ID should now be a combination of the

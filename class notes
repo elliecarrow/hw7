@@ -1,0 +1,15 @@
+  //       // Listen for the form submit and create/render the new post
+  //       document.querySelector('form').addEventListener('submit', async function(event) {
+  //         event.preventDefault()
+  //         let postUsername = document.querySelector('#username').value
+  //         let postImageUrl = document.querySelector('#image-url').value
+  //         let postNumberOfLikes = 0
+  //         let docRef = await db.collection('posts').add({ 
+  //           username: postUsername, 
+  //           imageUrl: postImageUrl, 
+  //           likes: 0,
+  //           created: firebase.firestore.FieldValue.serverTimestamp()
+  //         })
+  //         let postId = docRef.id // the newly created document's ID
+  //         renderPost(postId, postUsername, postImageUrl, postNumberOfLikes)
+  //       })
