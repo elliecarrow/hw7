@@ -20,7 +20,7 @@
 
       for (let i=0; i<movies.length; i++) {
         let movie = movies[i]
-        let docRef = await db.collection('watched').doc(`${movie.id}`).get()
+        let docRef = await db.collection('watched').doc(`${movie.id}-${user.uid}`).get()
         let watchedMovie = docRef.data()
         let opacityClass = ''
         if (watchedMovie) {
@@ -38,7 +38,7 @@
           event.preventDefault()
           let movieElement = document.querySelector(`.movie-${movie.id}`)
           movieElement.classList.add('opacity-20')
-          await db.collection('watched').doc(`${movie.id}`).set({})
+          await db.collection('watched').doc(`${movie.id}-${user.uid}`).set({})
         }) 
       }
 
@@ -103,3 +103,5 @@
 //         be set when the "I've watched" button on each movie is clicked. Likewise, 
 //         when the list of movies loads and is shown on the page, only the movies 
 //         watched by the currently logged-in user should be opaque.
+
+//        //
